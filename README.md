@@ -32,20 +32,20 @@ Knowledge Graph (NetworkX)
 ## Demo Screenshots
 
 ### Full Interface: Upload and Process
-![Interface](screenshots/01_interface.png)
+![Interface](screenshots/screenshots:01_interface.png)
 
 ### Layer 1: Arabic OCR and Layer 2: English Translation
-![OCR and Translation](screenshots/02_ocr_translation.png)
+![OCR and Translation](screenshots/screenshots:02_ocr_translation.png)
 
 ### Layer 1: Named Entity Recognition
 People, locations, and organizations extracted directly from Arabic text using CAMeL Tools AraBERT NER model.
 
-![Named Entities](screenshots/03_ner.png)
+![Named Entities](screenshots/screenshots:03_ner.png)
 
 ### Layer 1: Semantic Search
 Multilingual semantic search using sentence-transformers. English or Arabic queries return ranked results with entity metadata.
 
-![Semantic Search](screenshots/04_search.png)
+![Semantic Search](screenshots/screenshots:04_search.png)
 
 ## Tech Stack
 
