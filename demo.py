@@ -3,11 +3,11 @@ import pytesseract
 from PIL import Image, ImageFilter, ImageEnhance
 import chromadb
 from sentence_transformers import SentenceTransformer
-from camel_tools.ner import NERecognizer
-from camel_tools.tokenizers.word import simple_word_tokenize
 from transformers import MarianMTModel, MarianTokenizer
 import re
 import warnings
+import subprocess
+import os
 warnings.filterwarnings('ignore')
 
 st.set_page_config(
@@ -19,29 +19,51 @@ st.set_page_config(
 @st.cache_resource
 def load_models():
     models = {}
+
     with st.spinner("Loading embedder..."):
         models['embedder'] = SentenceTransformer(
             'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
         )
+
     with st.spinner("Loading ChromaDB..."):
         client = chromadb.PersistentClient(path="data/chromadb")
         try:
             models['collection'] = client.get_collection("arabic_documents")
         except:
             models['collection'] = None
-    with st.spinner("Loading NER model..."):
+
+    with st.spinner("Loading Arabic NER model..."):
         try:
+            # Download CAMeL model data if not present
+            camel_path = os.path.expanduser(
+                "~/.camel_tools/data/ner/arabert")
+            if not os.path.exists(camel_path):
+                st.info("Downloading Arabic NER model (542MB, one time only)...")
+                result = subprocess.run(
+                    ["camel_data", "-i", "ner-arabert"],
+                    capture_output=False,
+                    timeout=300
+                )
+            from camel_tools.ner import NERecognizer
             models['ner'] = NERecognizer.pretrained()
-        except:
+            models['ner_available'] = True
+            print("  ✓ NER loaded")
+        except Exception as e:
             models['ner'] = None
+            models['ner_available'] = False
+            print(f"  ✗ NER failed: {e}")
+
     with st.spinner("Loading translator..."):
         try:
             model_name = "Helsinki-NLP/opus-mt-ar-en"
             models['tokenizer'] = MarianTokenizer.from_pretrained(model_name)
             models['translator'] = MarianMTModel.from_pretrained(model_name)
-        except:
+            print("  ✓ Translator loaded")
+        except Exception as e:
             models['tokenizer'] = None
             models['translator'] = None
+            print(f"  ✗ Translator failed: {e}")
+
     return models
 
 def preprocess_image(img):
@@ -68,17 +90,11 @@ def clean_arabic(text):
     return '\n'.join(lines).strip()
 
 def prepare_for_translation(text):
-    """
-    Extra cleaning specifically before translation.
-    Removes all non-Arabic characters that break Helsinki model.
-    """
-    # Keep only Arabic letters, spaces, and basic punctuation
     clean = re.sub(
         r'[^\u0600-\u06FF\s\،\.\,]',
         ' ',
         text
     )
-    # Remove very short tokens that are OCR noise
     words = clean.split()
     words = [w for w in words if len(w) >= 2]
     clean = ' '.join(words)
@@ -121,12 +137,15 @@ def extract_entities(text, models):
     if not models.get('ner') or not text.strip():
         return result
     try:
+        from camel_tools.tokenizers.word import simple_word_tokenize
         tokens = simple_word_tokenize(text)
         if not tokens:
             return result
         labels = models['ner'].predict_sentence(tokens)
         type_map = {
-            "PERS": "PERSON", "LOC": "LOCATION", "ORG": "ORGANIZATION"
+            "PERS": "PERSON",
+            "LOC": "LOCATION",
+            "ORG": "ORGANIZATION"
         }
         current = []
         current_type = None
@@ -198,7 +217,11 @@ st.markdown("""
 st.divider()
 
 models = load_models()
-st.success("✓ All models loaded and ready!")
+
+if models.get('ner_available'):
+    st.success("✓ All models loaded and ready!")
+else:
+    st.warning("✓ Models loaded. NER model downloading in background...")
 
 tab1, tab2 = st.tabs(["📄 Process Document", "🔍 Search Documents"])
 
@@ -265,7 +288,6 @@ with tab1:
                         height=150
                     )
 
-                    # Show what was sent to translator
                     with st.expander(
                         "🔍 View cleaned input sent to translator"
                     ):
@@ -279,21 +301,21 @@ with tab1:
                     ner_col1, ner_col2, ner_col3 = st.columns(3)
                     with ner_col1:
                         st.markdown("**👤 People**")
-                        if entities['PERSON']:
+                        if entities.get('PERSON'):
                             for e in entities['PERSON']:
                                 st.markdown(f"• {e}")
                         else:
                             st.markdown("*None found*")
                     with ner_col2:
                         st.markdown("**📍 Locations**")
-                        if entities['LOCATION']:
+                        if entities.get('LOCATION'):
                             for e in entities['LOCATION']:
                                 st.markdown(f"• {e}")
                         else:
                             st.markdown("*None found*")
                     with ner_col3:
                         st.markdown("**🏛 Organizations**")
-                        if entities['ORGANIZATION']:
+                        if entities.get('ORGANIZATION'):
                             for e in entities['ORGANIZATION']:
                                 st.markdown(f"• {e}")
                         else:
