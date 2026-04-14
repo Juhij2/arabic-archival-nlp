@@ -47,6 +47,15 @@ Multilingual semantic search using sentence-transformers. English or Arabic quer
 
 ![Semantic Search](screenshots/screenshots:04_search.png)
 
+
+### Knowledge Graph: Entity Connections
+Entities extracted across all documents connected in a 
+knowledge graph using NetworkX. Documents in dark blue, 
+people in red, locations in blue, organizations in green.
+
+![Knowledge Graph](data/knowledge_graph/entity_graph.png)
+
+
 ## Tech Stack
 
 | Component | Tool |
