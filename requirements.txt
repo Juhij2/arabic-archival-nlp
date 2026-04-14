@@ -1,0 +1,13 @@
+streamlit
+pytesseract
+pillow
+chromadb
+sentence-transformers
+camel-tools
+transformers
+sentencepiece
+torch
+networkx
+pandas
+requests
+beautifulsoup4

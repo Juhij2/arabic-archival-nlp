@@ -1,0 +1,44 @@
+{
+  "arabic_doc_001.jpg": {
+    "description": "Two page manuscript black and red ink",
+    "entities": {
+      "PERSON": [
+        "بن فوا"
+      ],
+      "PLACE": [],
+      "DATE": [],
+      "OBJECT": [],
+      "ORG": []
+    },
+    "total_entities": 1
+  },
+  "arabic_doc_004.jpg": {
+    "description": "Handwritten administrative document with names and dates",
+    "entities": {
+      "PERSON": [
+        "بن ماش",
+        "بن ميلك"
+      ],
+      "PLACE": [
+        "البمنية"
+      ],
+      "DATE": [],
+      "OBJECT": [],
+      "ORG": [
+        "محافظة شهرة الارثقات"
+      ]
+    },
+    "total_entities": 4
+  },
+  "arabic_doc_005.jpg": {
+    "description": "Dense Arabic prose manuscript",
+    "entities": {
+      "PERSON": [],
+      "PLACE": [],
+      "DATE": [],
+      "OBJECT": [],
+      "ORG": []
+    },
+    "total_entities": 0
+  }
+}

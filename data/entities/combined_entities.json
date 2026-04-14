@@ -1,0 +1,78 @@
+{
+  "arabic_doc_001.jpg": {
+    "description": "Two page manuscript black and red ink",
+    "entities": {
+      "LOC": [
+        "لسمياق",
+        "ااا ادس",
+        "ستعسين",
+        "سناغا",
+        "ارلا"
+      ],
+      "PERS": [
+        "ايهالقا بو"
+      ],
+      "ORG": [
+        "ايناد"
+      ],
+      "MISC": [
+        "سيو"
+      ],
+      "PERSON": [
+        "بن فوا"
+      ]
+    },
+    "total": 9
+  },
+  "arabic_doc_004.jpg": {
+    "description": "Handwritten administrative document with names and dates",
+    "entities": {
+      "PERS": [
+        "يي",
+        "ريمت بن",
+        "معدو",
+        "سوك بن ماش",
+        "ايريصي سين",
+        "معن بن ميلك"
+      ],
+      "ORG": [
+        "محافظة شهرة الارثقات",
+        "مم"
+      ],
+      "PERSON": [
+        "بن ميلك",
+        "بن ماش"
+      ],
+      "PLACE": [
+        "البمنية"
+      ]
+    },
+    "total": 11
+  },
+  "arabic_doc_005.jpg": {
+    "description": "Dense Arabic prose manuscript",
+    "entities": {
+      "LOC": [
+        "والناط",
+        "عاراذ",
+        "اباصاحة",
+        "بقن خزراذالويزبزج",
+        "ابرزباف",
+        "بت",
+        "القنظوض",
+        "ركان"
+      ],
+      "ORG": [
+        "غورنالتنطزعل",
+        "الاو زيرف",
+        "نادي مال",
+        "لمر ريجياه",
+        "اشنا",
+        "والشتازتدود",
+        "ابالرسا",
+        "الودج"
+      ]
+    },
+    "total": 16
+  }
+}

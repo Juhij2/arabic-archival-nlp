@@ -1,0 +1,381 @@
+{
+  "nodes": [
+    {
+      "id": "Doc_001",
+      "type": "DOCUMENT",
+      "connections": 9
+    },
+    {
+      "id": "Doc_004",
+      "type": "DOCUMENT",
+      "connections": 11
+    },
+    {
+      "id": "Doc_005",
+      "type": "DOCUMENT",
+      "connections": 16
+    },
+    {
+      "id": "لسمياق",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "ااا ادس",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "ستعسين",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "سناغا",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "ارلا",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "ايهالقا بو",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "ايناد",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "سيو",
+      "type": "MISC",
+      "connections": 1
+    },
+    {
+      "id": "بن فوا",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "يي",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "ريمت بن",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "معدو",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "سوك بن ماش",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "ايريصي سين",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "معن بن ميلك",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "محافظة شهرة الارثقات",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "مم",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "بن ميلك",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "بن ماش",
+      "type": "PERSON",
+      "connections": 1
+    },
+    {
+      "id": "البمنية",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "والناط",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "عاراذ",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "اباصاحة",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "بقن خزراذالويزبزج",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "ابرزباف",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "بت",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "القنظوض",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "ركان",
+      "type": "LOCATION",
+      "connections": 1
+    },
+    {
+      "id": "غورنالتنطزعل",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "الاو زيرف",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "نادي مال",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "لمر ريجياه",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "اشنا",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "والشتازتدود",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "ابالرسا",
+      "type": "ORGANIZATION",
+      "connections": 1
+    },
+    {
+      "id": "الودج",
+      "type": "ORGANIZATION",
+      "connections": 1
+    }
+  ],
+  "edges": [
+    {
+      "source": "Doc_001",
+      "target": "لسمياق",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_001",
+      "target": "ااا ادس",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_001",
+      "target": "ستعسين",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_001",
+      "target": "سناغا",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_001",
+      "target": "ارلا",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_001",
+      "target": "ايهالقا بو",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_001",
+      "target": "ايناد",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_001",
+      "target": "سيو",
+      "relation": "contains_misc"
+    },
+    {
+      "source": "Doc_001",
+      "target": "بن فوا",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "يي",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "ريمت بن",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "معدو",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "سوك بن ماش",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "ايريصي سين",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "معن بن ميلك",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "محافظة شهرة الارثقات",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_004",
+      "target": "مم",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_004",
+      "target": "بن ميلك",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "بن ماش",
+      "relation": "contains_person"
+    },
+    {
+      "source": "Doc_004",
+      "target": "البمنية",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "والناط",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "عاراذ",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "اباصاحة",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "بقن خزراذالويزبزج",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "ابرزباف",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "بت",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "القنظوض",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "ركان",
+      "relation": "contains_location"
+    },
+    {
+      "source": "Doc_005",
+      "target": "غورنالتنطزعل",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_005",
+      "target": "الاو زيرف",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_005",
+      "target": "نادي مال",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_005",
+      "target": "لمر ريجياه",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_005",
+      "target": "اشنا",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_005",
+      "target": "والشتازتدود",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_005",
+      "target": "ابالرسا",
+      "relation": "contains_organization"
+    },
+    {
+      "source": "Doc_005",
+      "target": "الودج",
+      "relation": "contains_organization"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# ChromaDB data
+data/chromadb/
+
+# Model cache
+.camel_tools/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Large model files
+*.bin
+*.pt
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
