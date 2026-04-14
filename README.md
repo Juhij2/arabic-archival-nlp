@@ -123,6 +123,18 @@ arabic-archival-nlp/
 
 **Why ChromaDB for semantic search?** ChromaDB enables meaning-based search rather than keyword matching. A researcher can search in English and retrieve relevant Arabic documents based on semantic similarity.
 
+## Data Sources
+
+Sample documents are public domain Arabic manuscripts sourced from Wikimedia Commons:
+
+- **arabic_doc_001:** 1586 Egyptian Arabic manuscript (Kawkab al-munir bi sharh al-Jami as-Saghir), public domain
+- **arabic_doc_002:** Fatimid bestiary illustration from Fustat, Egypt, 11th-12th century, Metropolitan Museum of Art, public domain
+- **arabic_doc_003:** Ibn Fadhlan manuscript, 13th century, Ridawiya Library, public domain
+- **arabic_doc_004:** Al-Dishi Document (وثيقة الديشي), CC0 1.0 Universal Public Domain Dedication
+- **arabic_doc_005:** Explanations of Problems in Arithmetic with Examples, 18th century Timbuktu manuscript, Mamma Haidara Commemorative Library, Mali, World Digital Library, public domain
+
+All images verified public domain on Wikimedia Commons.
+
 ## Author
 
 Juhi Jadhav
