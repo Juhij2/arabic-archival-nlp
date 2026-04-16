@@ -32,20 +32,29 @@ Knowledge Graph (NetworkX)
 ## Demo Screenshots
 
 ### Full Interface: Upload and Process
-![Interface](screenshots/01_interface.png)
+![Interface](screenshots/screenshots:01_interface.png)
 
 ### Layer 1: Arabic OCR and Layer 2: English Translation
-![OCR and Translation](screenshots/02_ocr_translation.png)
+![OCR and Translation](screenshots/screenshots:02_ocr_translation.png)
 
 ### Layer 1: Named Entity Recognition
 People, locations, and organizations extracted directly from Arabic text using CAMeL Tools AraBERT NER model.
 
-![Named Entities](screenshots/03_ner.png)
+![Named Entities](screenshots/screenshots:03_ner.png)
 
 ### Layer 1: Semantic Search
 Multilingual semantic search using sentence-transformers. English or Arabic queries return ranked results with entity metadata.
 
-![Semantic Search](screenshots/04_search.png)
+![Semantic Search](screenshots/screenshots:04_search.png)
+
+
+### Knowledge Graph: Entity Connections
+Entities extracted across all documents connected in a 
+knowledge graph using NetworkX. Documents in dark blue, 
+people in red, locations in blue, organizations in green.
+
+![Knowledge Graph](data/knowledge_graph/entity_graph.png)
+
 
 ## Tech Stack
 
@@ -122,6 +131,18 @@ arabic-archival-nlp/
 **Why translation as Layer 2, not Layer 1?** Translating raw OCR output directly produces poor results because OCR errors compound during translation. Cleaning and structuring the Arabic text first, then translating, produces significantly better output.
 
 **Why ChromaDB for semantic search?** ChromaDB enables meaning-based search rather than keyword matching. A researcher can search in English and retrieve relevant Arabic documents based on semantic similarity.
+
+## Data Sources
+
+Sample documents are public domain Arabic manuscripts sourced from Wikimedia Commons:
+
+- **arabic_doc_001:** 1586 Egyptian Arabic manuscript (Kawkab al-munir bi sharh al-Jami as-Saghir), public domain
+- **arabic_doc_002:** Fatimid bestiary illustration from Fustat, Egypt, 11th-12th century, Metropolitan Museum of Art, public domain
+- **arabic_doc_003:** Ibn Fadhlan manuscript, 13th century, Ridawiya Library, public domain
+- **arabic_doc_004:** Al-Dishi Document (وثيقة الديشي), CC0 1.0 Universal Public Domain Dedication
+- **arabic_doc_005:** Explanations of Problems in Arithmetic with Examples, 18th century Timbuktu manuscript, Mamma Haidara Commemorative Library, Mali, World Digital Library, public domain
+
+All images verified public domain on Wikimedia Commons.
 
 ## Author
 
