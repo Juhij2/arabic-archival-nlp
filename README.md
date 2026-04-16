@@ -55,6 +55,18 @@ people in red, locations in blue, organizations in green.
 
 ![Knowledge Graph](data/knowledge_graph/entity_graph.png)
 
+### 🕸️ Graph Explorer: Interactive Entity Network
+
+Interactive knowledge graph built on SQLite. Click any node to explore connections. Filter by entity type or focus on a specific entity.
+
+![Graph Network](screenshots/screenshots:graph_01_network.png)
+
+### 📊 Graph Explorer: Example Research Queries
+
+Pre-built research queries showing what the archive can answer computationally. Includes people across documents, all locations, and person-location co-occurrence.
+
+![Research Queries](screenshots/screenshots:graph_02_network.png)
+
 
 ## Tech Stack
 ```
@@ -109,7 +121,7 @@ brew install tesseract-lang
 camel_data -i ner-arabert
 
 # Run the app
-streamlit run demo.py
+streamlit run demo_sqlite.py
 ```
 
 ## Repository Structure
