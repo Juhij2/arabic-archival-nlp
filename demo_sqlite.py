@@ -225,7 +225,7 @@ if models.get('ner_available'):
 else:
     st.warning(f"✓ Archive DB ready at `{DB_PATH}`. NER model may still need setup.")
 
-tab1, tab2, tab3 = st.tabs(["📄 Process Document", "🔍 Search Documents", "🗄 Archive Browser"])
+tab1, tab2, tab3, tab4 = st.tabs(["📄 Process Document", "🔍 Search Documents", "🗄 Archive Browser", "🕸️ Graph Explorer"])
 
 with tab1:
     st.markdown("### Upload a scanned Arabic document")
@@ -336,3 +336,234 @@ with tab3:
             st.info("Document not found in SQLite yet.")
         else:
             st.json(doc)
+
+with tab4:
+    import sqlite3 as _sqlite3
+    import pandas as pd
+    import networkx as nx
+    from pyvis.network import Network
+    import tempfile, os
+
+    st.markdown("### Entity Knowledge Graph")
+    st.markdown("Explore connections between people, locations, and organizations across all archived documents.")
+
+    @st.cache_data
+    def load_graph_data():
+        _conn = _sqlite3.connect(DB_PATH)
+        docs = pd.read_sql("""
+            SELECT d.id, d.source, s.summary_text as english_draft
+            FROM documents d
+            LEFT JOIN summaries s ON s.document_id = d.id
+            AND s.summary_type = 'english_draft'
+        """, _conn)
+        ents = pd.read_sql("""
+            SELECT e.id, e.document_id, e.entity_type,
+                   e.entity_text, d.source as document_source
+            FROM entities e
+            JOIN documents d ON d.id = e.document_id
+        """, _conn)
+        _conn.close()
+        return docs, ents
+
+    g_docs, g_ents = load_graph_data()
+
+    if g_ents.empty:
+        st.warning("No entities found. Process some documents first.")
+    else:
+        # Metrics row
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Documents", len(g_docs))
+        m2.metric("Total Entities", len(g_ents))
+        m3.metric("People", len(g_ents[g_ents['entity_type'] == 'PERSON']))
+        m4.metric("Locations", len(g_ents[g_ents['entity_type'] == 'LOCATION']))
+
+        # Sidebar filters inside tab
+        col_filter1, col_filter2 = st.columns(2)
+        with col_filter1:
+            type_filter = st.selectbox(
+                "Filter by entity type",
+                ["ALL"] + sorted(g_ents['entity_type'].unique().tolist()),
+                key="graph_type_filter"
+            )
+        with col_filter2:
+            entity_filter = st.selectbox(
+                "Focus on entity",
+                ["ALL"] + sorted(g_ents['entity_text'].unique().tolist()),
+                key="graph_entity_filter"
+            )
+
+        # Filter data
+        filtered = g_ents.copy()
+        if type_filter != "ALL":
+            filtered = filtered[filtered['entity_type'] == type_filter]
+        if entity_filter != "ALL":
+            filtered = filtered[filtered['entity_text'] == entity_filter]
+
+        # Build graph
+        G = nx.Graph()
+        color_map = {
+            "PERSON": "#e74c3c",
+            "LOCATION": "#3498db",
+            "ORGANIZATION": "#2ecc71",
+            "DATE": "#f39c12",
+            "EVENT": "#9b59b6"
+        }
+
+        for _, doc in g_docs.iterrows():
+            G.add_node(f"doc_{doc['id']}", label=doc['source'],
+                      node_type="document",
+                      title=f"Document: {doc['source']}")
+
+        for _, ent in filtered.iterrows():
+            eid = f"ent_{ent['entity_text']}"
+            if not G.has_node(eid):
+                G.add_node(eid,
+                    label=ent['entity_text'],
+                    node_type=ent['entity_type'],
+                    title=f"{ent['entity_type']}: {ent['entity_text']}",
+                    color=color_map.get(ent['entity_type'], "#95a5a6"))
+            G.add_edge(f"doc_{ent['document_id']}", eid)
+
+        # Render pyvis
+        net = Network(height="600px", width="100%",
+                     bgcolor="#1a1a2e", font_color="white")
+        for node_id, attrs in G.nodes(data=True):
+            if attrs.get("node_type") == "document":
+                net.add_node(node_id, label=attrs["label"],
+                           title=attrs["title"],
+                           color="#1abc9c", size=30, shape="box")
+            else:
+                net.add_node(node_id, label=attrs["label"],
+                           title=attrs["title"],
+                           color=attrs.get("color", "#95a5a6"),
+                           size=20, shape="dot")
+        for s, t in G.edges():
+            net.add_edge(s, t, color="#555555")
+
+        net.set_options("""
+        {
+          "physics": {
+            "enabled": true,
+            "forceAtlas2Based": {
+              "gravitationalConstant": -80,
+              "centralGravity": 0.015,
+              "springLength": 180,
+              "springConstant": 0.08,
+              "damping": 0.6,
+              "avoidOverlap": 0.5
+            },
+            "solver": "forceAtlas2Based",
+            "stabilization": {
+              "enabled": true,
+              "iterations": 400,
+              "fit": false
+            },
+            "minVelocity": 0.1
+          },
+          "interaction": {"hover": true, "tooltipDelay": 100},
+          "layout": {"randomSeed": 42, "improvedLayout": true}
+        }
+        """)
+
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=".html", mode="w"
+        ) as f:
+            net.save_graph(f.name)
+            html_path = f.name
+
+        with open(html_path, "r") as f:
+            html_content = f.read()
+
+        # Fix canvas sizing + reliable auto-fit so all nodes stay visible.
+        # Single fit() calls are unreliable in Streamlit iframes because the
+        # event timing varies. We fit multiple times with increasing delays
+        # and use padding so nodes do not get clipped at canvas edges.
+        fit_script = """
+        <script type="text/javascript">
+          (function() {
+            function doFit() {
+              if (typeof network !== 'undefined' && network) {
+                try {
+                  network.fit({
+                    animation: false,
+                    minZoomLevel: 0.3,
+                    maxZoomLevel: 2.0
+                  });
+                } catch(e) {}
+              }
+            }
+            function applyFix() {
+              var card = document.getElementById('mynetwork');
+              if (card) {
+                card.style.width = '100%';
+                card.style.height = '560px';
+              }
+              if (typeof network !== 'undefined' && network) {
+                // Fit when physics settles
+                network.once('stabilizationIterationsDone', doFit);
+                // Fallback fits at increasing delays to catch late-drifting nodes
+                setTimeout(doFit, 300);
+                setTimeout(doFit, 900);
+                setTimeout(doFit, 1800);
+                setTimeout(doFit, 3000);
+              } else {
+                setTimeout(applyFix, 150);
+              }
+            }
+            if (document.readyState === 'complete') { applyFix(); }
+            else { window.addEventListener('load', applyFix); }
+          })();
+        </script>
+        </body>
+        """
+        html_content = html_content.replace("</body>", fit_script)
+
+        st.components.v1.html(html_content, height=600, scrolling=False)
+        os.unlink(html_path)
+
+        st.markdown("""
+        **Legend:** 🟦 Document &nbsp; 🔴 Person &nbsp;
+        🔵 Location &nbsp; 🟢 Organization &nbsp;
+        🟡 Date &nbsp; 🟣 Event
+        """)
+
+        # Example queries
+        st.markdown("---")
+        st.markdown("### Example Research Queries")
+
+        with st.expander("📌 People appearing in more than one document"):
+            multi = g_ents[g_ents['entity_type'] == 'PERSON']\
+                .groupby('entity_text')['document_id']\
+                .nunique().reset_index()
+            multi.columns = ['Person', 'Document Count']
+            multi = multi[multi['Document Count'] > 1]
+            st.dataframe(multi if not multi.empty
+                        else pd.DataFrame([{"Result": "No person appears in multiple documents yet"}]),
+                        use_container_width=True)
+
+        with st.expander("📌 All locations mentioned across the archive"):
+            locs = g_ents[g_ents['entity_type'] == 'LOCATION']\
+                [['entity_text', 'document_source']]\
+                .drop_duplicates()\
+                .rename(columns={'entity_text': 'Location',
+                                'document_source': 'Found In'})
+            st.dataframe(locs if not locs.empty
+                        else pd.DataFrame([{"Result": "No locations found"}]),
+                        use_container_width=True)
+
+        with st.expander("📌 Documents where a person and location appear together"):
+            _conn2 = _sqlite3.connect(DB_PATH)
+            together = pd.read_sql("""
+                SELECT DISTINCT d.source as Document,
+                    p.entity_text as Person,
+                    l.entity_text as Location
+                FROM documents d
+                JOIN entities p ON p.document_id = d.id
+                    AND p.entity_type = 'PERSON'
+                JOIN entities l ON l.document_id = d.id
+                    AND l.entity_type = 'LOCATION'
+            """, _conn2)
+            _conn2.close()
+            st.dataframe(together if not together.empty
+                        else pd.DataFrame([{"Result": "No matches found"}]),
+                        use_container_width=True)
