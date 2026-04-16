@@ -157,6 +157,14 @@ Sample documents are public domain Arabic manuscripts sourced from Wikimedia Com
 
 All images verified public domain on Wikimedia Commons.
 
+## Demo Video
+
+▶️ **Video walkthrough of the Arabic Archival NLP pipeline**
+
+Watch a short demo of the full OCR → NER → semantic search → translation → knowledge graph workflow:
+
+[Watch the demo on Google Drive](https://drive.google.com/file/d/12hnrWqnpRp43yexKWE7Dc6exTVRw8Y8w/view?usp=sharing)
+
 ## Author
 
 Juhi Jadhav
