@@ -90,14 +90,29 @@ def clean_arabic(text):
     return '\n'.join(lines).strip()
 
 def prepare_for_translation(text):
+    """
+    Aggressive cleaning before translation.
+    Keeps only clean Arabic words of reasonable length.
+    """
+    # Keep only Arabic letters and spaces
     clean = re.sub(
-        r'[^\u0600-\u06FF\s\،\.\,]',
+        r'[^\u0600-\u06FF\s]',
         ' ',
         text
     )
+    # Remove words shorter than 3 characters (OCR noise)
     words = clean.split()
-    words = [w for w in words if len(w) >= 2]
-    clean = ' '.join(words)
+    words = [w for w in words if len(w) >= 3]
+    
+    # Remove duplicate consecutive words (OCR repetition)
+    deduped = []
+    prev = None
+    for w in words:
+        if w != prev:
+            deduped.append(w)
+        prev = w
+    
+    clean = ' '.join(deduped)
     clean = re.sub(r' +', ' ', clean)
     return clean.strip()
 

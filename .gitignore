@@ -1,15 +1,28 @@
-# ChromaDB data
-data/chromadb/
-
-# Model cache
-.camel_tools/
+# Python
 __pycache__/
 *.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Mac
 .DS_Store
 
 # Large model files
 *.bin
 *.pt
+*.h5
 
-# Jupyter checkpoints
-.ipynb_checkpoints/
+# Database files
+data/archive.db
+data/chromadb/
+
+# Environment
+.env
+.python-version
+venv/
+
+# Jupyter notebook data subfolder
+notebooks/data/
+
+# Raw images are included but keep this note
+# data/raw_images/ is intentionally tracked
