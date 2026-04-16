@@ -9,7 +9,7 @@ Arabic historical archives contain invaluable records that remain inaccessible t
 The architecture is directly motivated by the challenge of making Arabic expedition diaries and field notes, such as those written by Egyptian workers during early 20th century excavations at Giza, accessible to English-speaking researchers and connectable to existing English-language archive records.
 
 ## Pipeline Architecture
-
+```
 Scanned Document Image
 ↓
 Layer 1: OCR (Tesseract + Arabic language pack)
@@ -28,7 +28,7 @@ Knowledge Graph (NetworkX)
 **Layer 1** handles the core NLP work entirely in Arabic. It does not depend on translation.
 
 **Layer 2** adds English accessibility on top of the cleaned Layer 1 output, making the archive accessible to non-Arabic readers.
-
+```
 ## Demo Screenshots
 
 ### Full Interface: Upload and Process
@@ -57,7 +57,7 @@ people in red, locations in blue, organizations in green.
 
 
 ## Tech Stack
-
+```
 | Component | Tool |
 |---|---|
 | OCR | Tesseract 5.5 with Arabic language pack |
@@ -69,6 +69,14 @@ people in red, locations in blue, organizations in green.
 | Knowledge graph | NetworkX |
 | Web interface | Streamlit |
 | Language | Python 3.9 |
+```
+## Database Layer
+
+The pipeline can optionally persist OCR output, cleaned texts, and extracted entities in a local SQLite database for faster demos and structured querying.
+
+- `db.py` contains helper functions to create tables and interact with a local `archive.db` SQLite database.
+- `demo_sqlite.py` is a small demo script showing how to write to and query from the archive database.
+- `data/archive.db` is a sample SQLite database generated from the current pipeline. It is ignored by git and can be recreated locally by running the pipeline and the demo script.
 
 ## Sample Output
 
@@ -105,13 +113,15 @@ streamlit run demo.py
 ```
 
 ## Repository Structure
+```
 arabic-archival-nlp/
 ├── data/
 │   ├── raw_images/        # Source document scans
 │   ├── ocr_output/        # Raw OCR results
 │   ├── cleaned_text/      # Cleaned Arabic text
 │   ├── entities/          # Extracted entities
-│   └── knowledge_graph/   # Graph data and visualizations
+│   ├── knowledge_graph/   # Graph data and visualizations
+│   └── archive.db         # Local SQLite database (generated, ignored by git)
 ├── notebooks/
 │   ├── 01_ocr_pipeline.ipynb
 │   ├── 02_text_cleaning.ipynb
@@ -120,8 +130,11 @@ arabic-archival-nlp/
 │   └── 05_knowledge_graph.ipynb
 ├── screenshots/           # Demo screenshots
 ├── demo.py                # Streamlit web interface
+├── db.py                  # SQLite helper functions
+├── demo_sqlite.py         # Example script to populate / query archive.db
 ├── packages.txt           # System dependencies
 └── requirements.txt       # Python dependencies
+```
 ## Key Design Decisions
 
 **Why CAMeL Tools AraBERT for NER?** CAMeL Tools was built specifically for Arabic NLP and includes a NER model trained on Arabic text. Generic multilingual models perform poorly on Arabic historical documents.
