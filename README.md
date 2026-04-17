@@ -28,6 +28,9 @@ Knowledge Graph (NetworkX)
 **Layer 1** handles the core NLP work entirely in Arabic. It does not depend on translation.
 
 **Layer 2** adds English accessibility on top of the cleaned Layer 1 output, making the archive accessible to non-Arabic readers.
+↓
+Layer 3: AI Scholarly Analysis (Claude via Anthropic API)
+
 ```
 ## Demo Screenshots
 
@@ -67,6 +70,12 @@ Pre-built research queries showing what the archive can answer computationally. 
 
 ![Research Queries](screenshots/research_queries.png)
 
+### 🤖 AI Analysis: Scholarly Assessment via Claude
+
+Claude analyzes each uploaded manuscript in three columns: the original OCR text, a reconstructed Arabic text with English translation, and a scholarly assessment identifying document type, historical period, and what was recoverable versus too damaged to interpret.
+
+![AI Analysis](screenshots/ai_analysis1.png)
+
 
 ## Tech Stack
 ```
@@ -81,6 +90,7 @@ Pre-built research queries showing what the archive can answer computationally. 
 | Knowledge graph | NetworkX |
 | Web interface | Streamlit |
 | Language | Python 3.9 |
+| AI analysis | Anthropic Claude (claude-sonnet-4-6) |
 ```
 ## Database Layer
 
@@ -156,6 +166,8 @@ arabic-archival-nlp/
 **Why translation as Layer 2, not Layer 1?** Translating raw OCR output directly produces poor results because OCR errors compound during translation. Cleaning and structuring the Arabic text first, then translating, produces significantly better output.
 
 **Why ChromaDB for semantic search?** ChromaDB enables meaning-based search rather than keyword matching. A researcher can search in English and retrieve relevant Arabic documents based on semantic similarity.
+
+**Why Claude for Layer 3?** Automated translation of historical Arabic manuscripts fails in predictable ways: OCR noise compounds, archaic vocabulary is misread, and document structure is lost. Claude provides a scholarly layer that reconstructs degraded text, identifies document type and historical period, and flags what is unrecoverable. This mirrors what a human researcher would do as a first pass through an unfamiliar archival collection, without replacing the scholar's judgment.
 
 ## Data Sources
 
