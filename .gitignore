@@ -26,3 +26,4 @@ notebooks/data/
 
 # Raw images are included but keep this note
 # data/raw_images/ is intentionally tracked
+.streamlit/secrets.toml

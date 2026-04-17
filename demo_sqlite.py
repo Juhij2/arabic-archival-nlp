@@ -225,7 +225,7 @@ if models.get('ner_available'):
 else:
     st.warning(f"✓ Archive DB ready at `{DB_PATH}`. NER model may still need setup.")
 
-tab1, tab2, tab3, tab4 = st.tabs(["📄 Process Document", "🔍 Search Documents", "🗄 Archive Browser", "🕸️ Graph Explorer"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📄 Process Document", "🔍 Search Documents", "🗄 Archive Browser", "🕸️ Graph Explorer", "🤖 AI Analysis"])
 
 with tab1:
     st.markdown("### Upload a scanned Arabic document")
@@ -294,6 +294,7 @@ with tab1:
                             st.markdown(f"• {e}")
 
                     st.success(f"Saved document and derived data to SQLite with document_id={doc_id}")
+                    st.session_state["last_processed_doc_id"] = doc_id
 
 with tab2:
     st.markdown("### Search across all indexed documents")
@@ -567,3 +568,310 @@ with tab4:
             st.dataframe(together if not together.empty
                         else pd.DataFrame([{"Result": "No matches found"}]),
                         use_container_width=True)
+with tab5:
+    import anthropic
+    import json as _json
+
+    st.markdown("### 🤖 AI Manuscript Analysis")
+    st.markdown(
+        "Claude analyzes the raw OCR output of a newly uploaded manuscript: "
+        "reconstructing the original Arabic text, producing a scholarly English translation, "
+        "and flagging what was recoverable versus too damaged to interpret."
+    )
+
+    # ── Helper: chunk text ───────────────────────────────────
+    def chunk_text(text, size=400):
+        """Split text into chunks of roughly `size` characters at word boundaries."""
+        words = text.split()
+        chunks, current = [], []
+        length = 0
+        for word in words:
+            current.append(word)
+            length += len(word) + 1
+            if length >= size:
+                chunks.append(" ".join(current))
+                current, length = [], 0
+        if current:
+            chunks.append(" ".join(current))
+        return chunks
+
+    # ── Helper: call Claude on one chunk ────────────────────
+    def analyze_chunk(client, chunk_text_str, chunk_num, total):
+        prompt = f"""You are a specialist in historical Arabic manuscripts, particularly administrative, legal, and archival documents from the medieval and early modern Islamic world (roughly 9th–19th century).
+
+You are given a chunk of Arabic text that was extracted via OCR from a scanned manuscript image. The OCR quality is poor: words may be fused, characters broken, diacritics missing, and some tokens may be pure noise.
+
+Your task has three parts:
+
+1. RECONSTRUCT: Attempt to reconstruct what the original Arabic text most likely says. Correct obvious OCR errors. If a word is unrecoverable noise, replace it with [unclear]. Preserve the structure and meaning as best you can.
+
+2. TRANSLATE: Provide a careful English translation of your reconstructed Arabic. Use scholarly register appropriate for historical documents. Where you are uncertain, add a note in parentheses.
+
+3. ASSESSMENT: Briefly note the overall quality of this chunk. How much was recoverable? What type of document does this appear to be (administrative, legal, personal, religious, etc.)? What time period or context does the language suggest, if discernible?
+
+Format your response EXACTLY as follows with these three headers:
+
+RECONSTRUCTED ARABIC:
+[your reconstructed Arabic text]
+
+ENGLISH TRANSLATION:
+[your English translation]
+
+ASSESSMENT:
+[your brief scholarly assessment]
+
+Here is chunk {chunk_num} of {total}:
+
+{chunk_text_str}"""
+
+        message = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return message.content[0].text
+
+    # ── Helper: parse Claude response ───────────────────────
+    def parse_claude_response(response_text):
+        result = {
+            "reconstructed": "",
+            "translation": "",
+            "assessment": ""
+        }
+        sections = {
+            "RECONSTRUCTED ARABIC:": "reconstructed",
+            "ENGLISH TRANSLATION:": "translation",
+            "ASSESSMENT:": "assessment"
+        }
+        current_key = None
+        lines = response_text.split("\n")
+        for line in lines:
+            stripped = line.strip()
+            matched = False
+            for header, key in sections.items():
+                if stripped.startswith(header):
+                    current_key = key
+                    remainder = stripped[len(header):].strip()
+                    if remainder:
+                        result[current_key] = remainder
+                    matched = True
+                    break
+            if not matched and current_key:
+                result[current_key] = (result[current_key] + "\n" + line).strip()
+        return result
+
+    # ── Check for a recently processed document ─────────────
+    last_doc_id = st.session_state.get("last_processed_doc_id", None)
+
+    if last_doc_id is None:
+        st.info("Upload and process a document in the **📄 Process Document** tab first. The AI analysis will appear here automatically.")
+    else:
+        # Check if we already have a saved claude_analysis for this doc
+        import sqlite3 as _sq
+        _c = _sq.connect(DB_PATH)
+        existing = _c.execute(
+            "SELECT summary_text FROM summaries WHERE document_id=? AND summary_type='claude_analysis'",
+            (last_doc_id,)
+        ).fetchone()
+        doc_row = _c.execute(
+            "SELECT source, ocr_text_raw FROM documents WHERE id=?",
+            (last_doc_id,)
+        ).fetchone()
+        _c.close()
+
+        if doc_row is None:
+            st.error("Could not find the processed document in the database.")
+        else:
+            doc_source, ocr_raw = doc_row
+            st.markdown(f"**Analyzing:** `{doc_source}`")
+            st.divider()
+
+            if existing:
+                # Load saved analysis
+                st.success("✓ Analysis loaded from archive.")
+                try:
+                    saved = _json.loads(existing[0])
+                    chunks_data = saved.get("chunks", [])
+                except Exception:
+                    chunks_data = []
+                    st.warning("Could not parse saved analysis. Re-run to regenerate.")
+
+                for i, chunk in enumerate(chunks_data):
+                    with st.expander(f"Segment {i+1} of {len(chunks_data)}", expanded=(i == 0)):
+                        col_a, col_b, col_c = st.columns([1, 1, 1])
+                        with col_a:
+                            st.markdown("**🔤 Original OCR Text**")
+                            st.markdown(
+                                f"<div style='background:#1a1a2e;padding:12px;border-radius:8px;"
+                                f"font-family:serif;direction:rtl;text-align:right;"
+                                f"font-size:0.9em;color:#ccc;min-height:120px'>{chunk.get('original','')}</div>",
+                                unsafe_allow_html=True
+                            )
+                        with col_b:
+                            st.markdown("**🔧 Claude's Reconstruction + Translation**")
+                            st.markdown(
+                                f"<div style='background:#0d2137;padding:12px;border-radius:8px;"
+                                f"font-size:0.9em;color:#e8e8e8;min-height:120px'>"
+                                f"<strong>Arabic:</strong><br>"
+                                f"<span style='direction:rtl;display:block;text-align:right;font-family:serif'>"
+                                f"{chunk.get('reconstructed','')}</span><br>"
+                                f"<strong>English:</strong><br>{chunk.get('translation','')}</div>",
+                                unsafe_allow_html=True
+                            )
+                        with col_c:
+                            st.markdown("**📋 Scholarly Assessment**")
+                            st.markdown(
+                                f"<div style='background:#0d3320;padding:12px;border-radius:8px;"
+                                f"font-size:0.9em;color:#c8e6c9;min-height:120px'>"
+                                f"{chunk.get('assessment','')}</div>",
+                                unsafe_allow_html=True
+                            )
+
+            else:
+                # Run fresh analysis
+                # Quick Claude connection test
+                if st.button("Test Claude connection", key="test_claude_connection"):
+                    try:
+                        api_key = st.secrets.get("ANTHROPIC_API_KEY", "").strip()
+                        if not api_key:
+                            st.error("Missing ANTHROPIC_API_KEY in .streamlit/secrets.toml")
+                        elif not api_key.startswith("sk-ant-"):
+                            st.error("Anthropic API key format looks wrong.")
+                        else:
+                            client = anthropic.Anthropic(api_key=api_key)
+                            resp = client.messages.create(
+                                model="claude-sonnet-4-6",
+                                max_tokens=20,
+                                messages=[{"role": "user", "content": "Reply only with OK"}]
+                            )
+                            st.success(resp.content[0].text)
+                    except Exception as e:
+                        st.error(repr(e))
+
+                run_analysis = st.button("🤖 Run AI Analysis", type="primary", use_container_width=True)
+
+                if run_analysis:
+                    try:
+                        api_key = st.secrets["ANTHROPIC_API_KEY"]
+                    except Exception:
+                        st.error("API key not found. Make sure .streamlit/secrets.toml contains ANTHROPIC_API_KEY.")
+                        st.stop()
+
+                    client = anthropic.Anthropic(api_key=api_key)
+
+                    if not ocr_raw or not ocr_raw.strip():
+                        st.error("No OCR text found for this document.")
+                        st.stop()
+
+                    chunks = chunk_text(ocr_raw, size=400)
+                    total = len(chunks)
+                    st.info(f"Analyzing {total} segment(s)...")
+
+                    progress = st.progress(0)
+                    chunks_data = []
+                    failed_chunks = []
+
+                    for i, chunk in enumerate(chunks):
+                        with st.spinner(f"Claude is analyzing segment {i+1} of {total}..."):
+                            try:
+                                response = analyze_chunk(client, chunk, i+1, total)
+                                parsed = parse_claude_response(response)
+                                parsed["original"] = chunk
+                                chunks_data.append(parsed)
+                            except Exception as e:
+                                failed_chunks.append(
+                                    {"segment": i + 1, "error": str(e), "original": chunk}
+                                )
+                                chunks_data.append({
+                                    "original": chunk,
+                                    "reconstructed": "",
+                                    "translation": "",
+                                    "assessment": f"Analysis failed for segment {i+1}: {e}"
+                                })
+                        progress.progress((i + 1) / total)
+
+                    progress.empty()
+
+                    if failed_chunks:
+                        st.error(
+                            f"Analysis failed for {len(failed_chunks)} of {total} segment(s). "
+                            "Results were NOT saved to the archive. Please retry."
+                        )
+
+                        with st.expander("Show failed segments"):
+                            for f in failed_chunks:
+                                st.markdown(f"**Segment {f['segment']}**")
+                                st.code(f["error"])
+                        
+                        for i, chunk in enumerate(chunks_data):
+                            with st.expander(f"Segment {i+1} of {total}", expanded=(i == 0)):
+                                col_a, col_b, col_c = st.columns([1, 1, 1])
+                                with col_a:
+                                    st.markdown("**🔤 Original OCR Text**")
+                                    st.markdown(
+                                        f"<div style='background:#1a1a2e;padding:12px;border-radius:8px;"
+                                        f"font-family:serif;direction:rtl;text-align:right;"
+                                        f"font-size:0.9em;color:#ccc;min-height:120px'>{chunk.get('original','')}</div>",
+                                        unsafe_allow_html=True
+                                    )
+                                with col_b:
+                                    st.markdown("**🔧 Claude's Reconstruction + Translation**")
+                                    st.markdown(
+                                        f"<div style='background:#0d2137;padding:12px;border-radius:8px;"
+                                        f"font-size:0.9em;color:#e8e8e8;min-height:120px'>"
+                                        f"<strong>Arabic:</strong><br>"
+                                        f"<span style='direction:rtl;display:block;text-align:right;font-family:serif'>"
+                                        f"{chunk.get('reconstructed','')}</span><br>"
+                                        f"<strong>English:</strong><br>{chunk.get('translation','')}</div>",
+                                        unsafe_allow_html=True
+                                    )
+                                with col_c:
+                                    st.markdown("**📋 Scholarly Assessment**")
+                                    st.markdown(
+                                        f"<div style='background:#0d3320;padding:12px;border-radius:8px;"
+                                        f"font-size:0.9em;color:#c8e6c9;min-height:120px'>"
+                                        f"{chunk.get('assessment','')}</div>",
+                                        unsafe_allow_html=True
+                                    )
+                    else:
+                        upsert_summary(
+                            conn,
+                            last_doc_id,
+                            'claude_analysis',
+                            _json.dumps({"chunks": chunks_data}),
+                            method='claude-sonnet-4-6',
+                            quality_note='AI reconstruction, translation, and assessment'
+                        )
+
+                        st.success("✓ Analysis complete and saved to archive.")
+
+                        for i, chunk in enumerate(chunks_data):
+                            with st.expander(f"Segment {i+1} of {total}", expanded=(i == 0)):
+                                col_a, col_b, col_c = st.columns([1, 1, 1])
+                                with col_a:
+                                    st.markdown("**🔤 Original OCR Text**")
+                                    st.markdown(
+                                        f"<div style='background:#1a1a2e;padding:12px;border-radius:8px;"
+                                        f"font-family:serif;direction:rtl;text-align:right;"
+                                        f"font-size:0.9em;color:#ccc;min-height:120px'>{chunk.get('original','')}</div>",
+                                        unsafe_allow_html=True
+                                    )
+                                with col_b:
+                                    st.markdown("**🔧 Claude's Reconstruction + Translation**")
+                                    st.markdown(
+                                        f"<div style='background:#0d2137;padding:12px;border-radius:8px;"
+                                        f"font-size:0.9em;color:#e8e8e8;min-height:120px'>"
+                                        f"<strong>Arabic:</strong><br>"
+                                        f"<span style='direction:rtl;display:block;text-align:right;font-family:serif'>"
+                                        f"{chunk.get('reconstructed','')}</span><br>"
+                                        f"<strong>English:</strong><br>{chunk.get('translation','')}</div>",
+                                        unsafe_allow_html=True
+                                    )
+                                with col_c:
+                                    st.markdown("**📋 Scholarly Assessment**")
+                                    st.markdown(
+                                        f"<div style='background:#0d3320;padding:12px;border-radius:8px;"
+                                        f"font-size:0.9em;color:#c8e6c9;min-height:120px'>"
+                                        f"{chunk.get('assessment','')}</div>",
+                                        unsafe_allow_html=True
+                                    )
