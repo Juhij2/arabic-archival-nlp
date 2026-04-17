@@ -65,7 +65,7 @@ Interactive knowledge graph built on SQLite. Click any node to explore connectio
 
 Pre-built research queries showing what the archive can answer computationally. Includes people across documents, all locations, and person-location co-occurrence.
 
-![Research Queries](screenshots/screenshots:graph_02_network.png)
+![Research Queries](screenshots/research_queries.png)
 
 
 ## Tech Stack
