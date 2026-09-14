@@ -323,7 +323,7 @@ with tab2:
                     st.info("No lexical matches yet in SQLite. Process or import documents first.")
                 for row in rows:
                     with st.expander(row['source'], expanded=True):
-                        st.markdown(f"**Description:** {row['description'] or '—'}")
+                        st.markdown(f"**Description:** {row['description'] or 'none'}")
                         st.markdown(f"**Preview:** {(row['ocr_text_clean'] or '')[:250]}...")
             except Exception as e:
                 st.error(f"FTS query issue: {e}")
