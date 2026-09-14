@@ -6,7 +6,7 @@ A proof of concept end-to-end NLP pipeline for Arabic historical document analys
 
 Arabic historical archives contain invaluable records that remain inaccessible to most researchers due to language barriers and the challenges of digitizing handwritten Arabic documents. This pipeline addresses the core problem: how do you take a scanned Arabic historical document and make it searchable, translatable, and connected to other records?
 
-The architecture is directly motivated by the challenge of making Arabic expedition diaries and field notes, such as those written by Egyptian workers during early 20th century excavations at Giza, accessible to English-speaking researchers and connectable to existing English-language archive records.
+The architecture is directly motivated by the challenge of making Arabic expedition diaries and field notes, such as those written by Egyptian workers during early 20th century excavations at Giza, accessible to English-speaking researchers and connectable to existing English-language archive records. It was built as a prototype for Professor Peter Der Manuelian's Giza Project at Harvard. It has not yet been run on the diaries themselves, which are handwritten and would need a handwriting recognition (HTR) layer in place of Tesseract OCR.
 
 ## Pipeline Architecture
 ```
@@ -98,11 +98,13 @@ The pipeline can optionally persist OCR output, cleaned texts, and extracted ent
 
 - `db.py` contains helper functions to create tables and interact with a local `archive.db` SQLite database.
 - `demo_sqlite.py` is a small demo script showing how to write to and query from the archive database.
-- `data/archive.db` is a sample SQLite database generated from the current pipeline. It is ignored by git and can be recreated locally by running the pipeline and the demo script.
+- `data/archive.db` is a sample SQLite database generated from the current pipeline. It can be recreated locally by running the pipeline and the demo script.
 
 ## Sample Output
 
 Input: Scanned Arabic administrative document (arabic_doc_004)
+
+> **Read this output as a demonstration of the pipeline's structure, not of accurate extraction.** On these public-domain manuscripts Tesseract's Arabic OCR is largely unreadable (see `data/ocr_output/`), so the entities and translation below inherit that noise. Layer 3, the Claude analysis step, exists to reconstruct degraded text and flag what cannot be recovered.
 
 **Named entities extracted:**
 - People: احمد الديشي, ابررخكي, بن سه بن ماتد بن
@@ -143,7 +145,7 @@ arabic-archival-nlp/
 │   ├── cleaned_text/      # Cleaned Arabic text
 │   ├── entities/          # Extracted entities
 │   ├── knowledge_graph/   # Graph data and visualizations
-│   └── archive.db         # Local SQLite database (generated, ignored by git)
+│   └── archive.db         # Local SQLite database (generated)
 ├── notebooks/
 │   ├── 01_ocr_pipeline.ipynb
 │   ├── 02_text_cleaning.ipynb
