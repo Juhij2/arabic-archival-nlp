@@ -6,8 +6,6 @@ A proof of concept end-to-end NLP pipeline for Arabic historical document analys
 
 Arabic historical archives contain invaluable records that remain inaccessible to most researchers due to language barriers and the challenges of digitizing handwritten Arabic documents. This pipeline addresses the core problem: how do you take a scanned Arabic historical document and make it searchable, translatable, and connected to other records?
 
-The architecture is directly motivated by the challenge of making Arabic expedition diaries and field notes, such as those written by Egyptian workers during early 20th century excavations at Giza, accessible to English-speaking researchers and connectable to existing English-language archive records. It was built as a prototype for Professor Peter Der Manuelian's Giza Project at Harvard. It has not yet been run on the diaries themselves, which are handwritten and would need a handwriting recognition (HTR) layer in place of Tesseract OCR.
-
 ## Pipeline Architecture
 ```
 Scanned Document Image
